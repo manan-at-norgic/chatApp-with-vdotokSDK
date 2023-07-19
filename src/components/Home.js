@@ -4,19 +4,24 @@ import { useEffect } from "react";
 import { connect } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import env from "../config";
-import { BsChat } from "react-icons/bs";
-import { RiUser3Line } from "react-icons/ri";
 import { ToastContainer, toast } from "react-toastify";
+import CreateGroup from "./groupCreation/CreateGroup";
 
-const Home = ({ setLoginInfo, state, resetLoginInfo, setAllUsers }) => {
+const Home = ({
+  setLoginInfo,
+  state,
+  resetLoginInfo,
+  setAllUsers,
+  setIsUserListActive,
+  setIsOneToOne,
+}) => {
   const inputRef = useRef(null);
   const usersRef = useRef(null);
-  const [isActive, setIsActive] = useState(false);
   const [localUsers, setLocalUsers] = useState(null);
   const navigate = useNavigate();
 
   const handleFocus = () => {
-    setIsActive(true);
+    setIsUserListActive(true);
   };
   // handling rather than input field
   const handleClickOutside = (event) => {
@@ -27,13 +32,10 @@ const Home = ({ setLoginInfo, state, resetLoginInfo, setAllUsers }) => {
       !usersRef.current.contains(event.target)
     ) {
       // Close the component or perform any desired action
-      setIsActive(false);
+      setIsUserListActive(false);
+      setIsOneToOne(true);
       // console.log("Clicked outside the container and specific element");
     }
-  };
-
-  const handleBlur = () => {
-    setIsActive(false);
   };
 
   const logout = () => {
@@ -121,8 +123,8 @@ const Home = ({ setLoginInfo, state, resetLoginInfo, setAllUsers }) => {
         />
         {/* <!-- headaer --> */}
         <div className="px-5 py-5 flex justify-between items-center bg-white border-b-2">
-          <div className="font-semibold text-2xl">GoingChat</div>
-          <div className="w-1/2">
+          <div className="font-semibold text-2xl">Chat JS</div>
+          <div className="w-1/2 ml-12">
             <input
               ref={inputRef}
               onFocus={handleFocus}
@@ -134,46 +136,8 @@ const Home = ({ setLoginInfo, state, resetLoginInfo, setAllUsers }) => {
               placeholder="search user"
               className="rounded-2xl search relative bg-gray-100 py-3 px-5 w-1/2"
             />
-            {isActive ? (
-              <div
-                id="users"
-                ref={usersRef}
-                className="absolute overflow-y-scroll flex flex-col rounded-2xl bg-slate-50 border w-1/4 "
-                style={{ height: "calc(100vh - 15rem)" }}
-              >
-                {/* <div class="rounded-lg bg-white shadow-lg flex items-center justify-around cursor-pointer h-auto my-2 border mx-6 px-6">
-                  <div className="flex flex-row justify-center items-center">
-                    <RiUser3Line className=" mr-4" />
-                    <div class=" my-2 mt-3">
-                      <h2 class=" font-semibold text-lg text-clr">david2</h2>
-                    </div>
-                  </div>
-                  <BsChat />
-                </div> */}
-                {localUsers === null
-                  ? ""
-                  : localUsers.map((elem, index) => {
-                      return (
-                        <div
-                          key={index}
-                          className="rounded-lg bg-white shadow-lg flex items-center justify-around cursor-pointer h-auto my-2 border mx-6 px-6"
-                        >
-                          <div className="flex flex-row justify-center items-center">
-                            <RiUser3Line className=" mr-4" />
-                            <div className=" my-2 mt-3">
-                              <h2 className=" font-semibold text-lg text-clr">
-                                {elem.username}
-                              </h2>
-                            </div>
-                          </div>
-                          <BsChat />
-                        </div>
-                      );
-                    })}
-              </div>
-            ) : (
-              ""
-            )}
+
+            <CreateGroup usersRef={usersRef} localUsers={localUsers} />
           </div>
           <div className="flex flex-row justify-center items-center">
             <div className="h-12 w-12 p-2 bg-yellow-500 rounded-full text-white font-semibold flex items-center justify-center">
@@ -433,6 +397,12 @@ const mapDispatchToProps = (dispatch) => {
     },
     setAllUsers: (data) => {
       dispatch({ type: "ALL_USERS", payload: data });
+    },
+    setIsOneToOne: (data) => {
+      dispatch({ type: "IS_ONE_TO_ONE", payload: data });
+    },
+    setIsUserListActive: (data) => {
+      dispatch({ type: "IS_USER_LIST_ACTIVE", payload: data });
     },
   };
 };

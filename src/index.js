@@ -9,11 +9,13 @@ import authReducer from "./redux/reducers/authReducer";
 import "./index.css";
 import "react-toastify/dist/ReactToastify.min.css";
 import allusers from "./redux/reducers/allUsers";
+import userListBox from "./redux/reducers/userListBox";
 
 //combie reducers
 const rootReducer = combineReducers({
   auth: authReducer,
   allUsers: allusers,
+  userListBox: userListBox,
 });
 // Creating store
 const store = createStore(rootReducer, composeWithDevTools());
