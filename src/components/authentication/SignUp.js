@@ -5,7 +5,7 @@ import env from "../../config";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 
-const SignUp = ({ setUser, state }) => {
+const SignUp = ({ setLoginInfo, state, setAllUsers }) => {
   const [signUpForm, setSignUpForm] = useState({
     name: "",
     email: "",
@@ -36,11 +36,23 @@ const SignUp = ({ setUser, state }) => {
       let resp = await axios.post(`${env.url}SignUp`, payload);
 
       if (resp.data.status === 200) {
-        setUser({
+        setLoginInfo({
           user: resp.data,
           token: resp.data.auth_token,
           isLoggedIn: true,
         });
+        {
+          /*let payload = {
+          auth_token: resp.data.auth_token,
+        };
+        let response = await axios.post(`${env.url}AllUsers`, payload);
+        if (response.data.status === 200) {
+          setAllUsers(response.data.users);
+        } else {
+          toast.warn(`${response.data.message}`);
+        }
+      */
+        }
       } else {
         toast.warn(`Error: ${resp.data.message}`);
       }
@@ -162,8 +174,11 @@ const SignUp = ({ setUser, state }) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setUser: (data) => {
-      dispatch({ type: "SET_USER", payload: data });
+    setLoginInfo: (data) => {
+      dispatch({ type: "SET_LOGIN_INFO", payload: data });
+    },
+    setAllUsers: (data) => {
+      dispatch({ type: "ALL_USERS", payload: data });
     },
   };
 };

@@ -6,7 +6,7 @@ const initialState = {
 
 const authReducer = (state = initialState, action) => {
   switch (action.type) {
-    case "SET_USER":
+    case "SET_LOGIN_INFO":
       localStorage.setItem("user", JSON.stringify(action.payload));
       return (state = {
         isLoggedIn: action.payload.isLoggedIn,
@@ -14,7 +14,7 @@ const authReducer = (state = initialState, action) => {
         token: action.payload.token,
       });
 
-    case "RESET_USER":
+    case "RESET_LOGIN_INFO":
       return (state = initialState);
     default:
       return state;

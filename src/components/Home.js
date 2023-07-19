@@ -1,53 +1,192 @@
-import React from "react";
+import axios from "axios";
+import React, { useRef, useState } from "react";
 import { useEffect } from "react";
 import { connect } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import env from "../config";
+import { BsChat } from "react-icons/bs";
+import { RiUser3Line } from "react-icons/ri";
+import { ToastContainer, toast } from "react-toastify";
 
-const Home = ({ setUser, state, resetUser }) => {
+const Home = ({ setLoginInfo, state, resetLoginInfo, setAllUsers }) => {
+  const inputRef = useRef(null);
+  const usersRef = useRef(null);
+  const [isActive, setIsActive] = useState(false);
+  const [localUsers, setLocalUsers] = useState(null);
   const navigate = useNavigate();
 
+  const handleFocus = () => {
+    setIsActive(true);
+  };
+  // handling rather than input field
+  const handleClickOutside = (event) => {
+    if (
+      inputRef.current &&
+      usersRef.current &&
+      !inputRef.current.contains(event.target) &&
+      !usersRef.current.contains(event.target)
+    ) {
+      // Close the component or perform any desired action
+      setIsActive(false);
+      // console.log("Clicked outside the container and specific element");
+    }
+  };
+
+  const handleBlur = () => {
+    setIsActive(false);
+  };
+
   const logout = () => {
-    resetUser();
+    resetLoginInfo();
     localStorage.removeItem("user");
     navigate("/");
   };
 
+  // if logged in fetch users list (localstorage)
   useEffect(() => {
     let isLogin = localStorage.getItem("user");
-    if ((isLogin && state.auth.isLoggedIn === false) || state == undefined) {
+    if (isLogin && state.auth.isLoggedIn === false) {
       // console.log(JSON.parse(isLogin));
       let data = JSON.parse(isLogin);
-      setUser(data);
+      setLoginInfo(data);
+      let fetchAllUsers = async () => {
+        console.warn(data.token);
+
+        let payload = { auth_token: data.token };
+        let response = await axios.post(`${env.url}AllUsers`, payload);
+        // console.log(response, "response from homeeeeee");
+        if (response.data.status === 200) {
+          setAllUsers(response.data.users);
+          setLocalUsers(response.data.users);
+        } else {
+          toast.warn(`${response.data.message}`);
+        }
+        return response;
+      };
+
+      fetchAllUsers();
       // navigate("/");
     }
   }, []);
+  // if logged in fetch users list(redux state)
+  useEffect(() => {
+    if (state.auth.isLoggedIn === true) {
+      let fetchAllUsers = async () => {
+        // console.warn(data.token);
+
+        let payload = { auth_token: state.auth.token };
+        let response = await axios.post(`${env.url}AllUsers`, payload);
+        // console.log(response, "response from homeeeeee");
+        if (response.data.status === 200) {
+          setAllUsers(response.data.users);
+          setLocalUsers(response.data.users);
+        } else {
+          toast.warn(`${response.data.message}`);
+        }
+        return response;
+      };
+
+      fetchAllUsers();
+    }
+  }, []);
+  // event listner for active state and inavtive state of input field
+  useEffect(() => {
+    const handleWindowClick = (event) => {
+      handleClickOutside(event);
+    };
+
+    window.addEventListener("click", handleWindowClick);
+
+    return () => {
+      window.removeEventListener("click", handleWindowClick);
+    };
+  }, []);
+
   return (
     <>
       {/* <!-- component -->
 <!-- This is an example component --> */}
       <div className="h-screen w-screen shadow-lg rounded-lg">
+        <ToastContainer
+          position="top-right"
+          autoClose={2000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
         {/* <!-- headaer --> */}
         <div className="px-5 py-5 flex justify-between items-center bg-white border-b-2">
           <div className="font-semibold text-2xl">GoingChat</div>
           <div className="w-1/2">
             <input
+              ref={inputRef}
+              onFocus={handleFocus}
+              // onBlur={handleBlur}
               type="text"
               name=""
               id=""
-              placeholder="search IRL"
-              className="rounded-2xl bg-gray-100 py-3 px-5 w-full"
+              // onClick={() => {}}
+              placeholder="search user"
+              className="rounded-2xl search relative bg-gray-100 py-3 px-5 w-1/2"
             />
+            {isActive ? (
+              <div
+                id="users"
+                ref={usersRef}
+                className="absolute overflow-y-scroll flex flex-col rounded-2xl bg-slate-50 border w-1/4 "
+                style={{ height: "calc(100vh - 15rem)" }}
+              >
+                {/* <div class="rounded-lg bg-white shadow-lg flex items-center justify-around cursor-pointer h-auto my-2 border mx-6 px-6">
+                  <div className="flex flex-row justify-center items-center">
+                    <RiUser3Line className=" mr-4" />
+                    <div class=" my-2 mt-3">
+                      <h2 class=" font-semibold text-lg text-clr">david2</h2>
+                    </div>
+                  </div>
+                  <BsChat />
+                </div> */}
+                {localUsers === null
+                  ? ""
+                  : localUsers.map((elem, index) => {
+                      return (
+                        <div
+                          key={index}
+                          className="rounded-lg bg-white shadow-lg flex items-center justify-around cursor-pointer h-auto my-2 border mx-6 px-6"
+                        >
+                          <div className="flex flex-row justify-center items-center">
+                            <RiUser3Line className=" mr-4" />
+                            <div className=" my-2 mt-3">
+                              <h2 className=" font-semibold text-lg text-clr">
+                                {elem.username}
+                              </h2>
+                            </div>
+                          </div>
+                          <BsChat />
+                        </div>
+                      );
+                    })}
+              </div>
+            ) : (
+              ""
+            )}
           </div>
-          <div className="h-12 w-12 p-2 bg-yellow-500 rounded-full text-white font-semibold flex items-center justify-center">
-            RA
+          <div className="flex flex-row justify-center items-center">
+            <div className="h-12 w-12 p-2 bg-yellow-500 rounded-full text-white font-semibold flex items-center justify-center">
+              RA
+            </div>
+            <button
+              onClick={() => {
+                logout();
+              }}
+            >
+              logout
+            </button>
           </div>
-          <button
-            onClick={() => {
-              logout();
-            }}
-          >
-            logout
-          </button>
         </div>
         {/* <!-- end header -->
     <!-- Chatting --> */}
@@ -286,11 +425,14 @@ const Home = ({ setUser, state, resetUser }) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setUser: (data) => {
-      dispatch({ type: "SET_USER", payload: data });
+    setLoginInfo: (data) => {
+      dispatch({ type: "SET_LOGIN_INFO", payload: data });
     },
-    resetUser: (data) => {
-      dispatch({ type: "RESET_USER" });
+    resetLoginInfo: (data) => {
+      dispatch({ type: "RESET_LOGIN_INFO" });
+    },
+    setAllUsers: (data) => {
+      dispatch({ type: "ALL_USERS", payload: data });
     },
   };
 };

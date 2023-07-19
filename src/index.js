@@ -8,12 +8,12 @@ import authReducer from "./redux/reducers/authReducer";
 
 import "./index.css";
 import "react-toastify/dist/ReactToastify.min.css";
-import postReducer from "./redux/reducers/postReducer";
+import allusers from "./redux/reducers/allUsers";
 
 //combie reducers
 const rootReducer = combineReducers({
   auth: authReducer,
-  post: postReducer,
+  allUsers: allusers,
 });
 // Creating store
 const store = createStore(rootReducer, composeWithDevTools());
