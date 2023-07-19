@@ -1,14 +1,14 @@
 import React from "react";
-
+import { connect } from "react-redux";
 import { BsChat } from "react-icons/bs";
 import { RiUser3Line } from "react-icons/ri";
 
-const Group1to1 = ({ localUsers }) => {
+const Group1to1 = ({ state }) => {
   return (
     <>
-      {localUsers === null
+      {state.allUsers.length === 0
         ? ""
-        : localUsers.map((elem, index) => {
+        : state.allUsers.map((elem, index) => {
             return (
               <div
                 key={index}
@@ -28,4 +28,8 @@ const Group1to1 = ({ localUsers }) => {
   );
 };
 
-export default Group1to1;
+const mapStateToProps = (state) => ({
+  state: state,
+});
+
+export default connect(mapStateToProps, null)(Group1to1);
