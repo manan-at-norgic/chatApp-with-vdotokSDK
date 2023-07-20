@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import Group1to1 from "./OneToOne";
 import { AiOutlineUsergroupAdd } from "react-icons/ai";
 import { MdOutlineKeyboardBackspace, MdDone } from "react-icons/md";
@@ -6,14 +5,17 @@ import ManyToMany from "./ManyToMany";
 import { connect } from "react-redux";
 
 //get local users from redux
-const CreateGroup = ({ usersRef, localUsers, state, setIsOneToOne }) => {
-  //   const [isOneToOne, setIsOneToOne] = useState(true);
-
+const CreateGroup = ({ usersRef, state, setIsOneToOne, resetCheckboxItem }) => {
   const changeGroupType = () => {
     setIsOneToOne(!state.userListBox.isOneToOne);
+    resetCheckboxItem();
   };
   const usersSelected = () => {
-    console.log("usersSelected");
+    if (state.checkboxCheckedList.length > 0) {
+      console.log("ok");
+    } else {
+      console.log("not ok");
+    }
   };
   return (
     <>
@@ -30,33 +32,46 @@ const CreateGroup = ({ usersRef, localUsers, state, setIsOneToOne }) => {
               {state.userListBox.isOneToOne ? (
                 <>
                   <div
-                    className="my-2 h-8  font-semibold text-lg flex items-center text-center border"
+                    className="my-2 h-8 justify-between font-semibold text-lg flex items-center text-center border"
                     ref={usersRef}
                   >
+                    <span className=" ml-28">create group chat</span>
                     <span
                       onClick={changeGroupType}
                       className="ml-4 cursor-pointer"
                     >
-                      <AiOutlineUsergroupAdd />
+                      <AiOutlineUsergroupAdd
+                        className="mr-14 text-blue-500"
+                        size="1.5rem"
+                      />
                     </span>
-                    <span className="ml-6">create group chat</span>
                   </div>
                 </>
               ) : (
                 <>
-                  {/* change Group type not working properly */}
                   <div
-                    className=" my-2 h-8  font-semibold text-lg flex items-center text-center border"
+                    className=" my-2 h-8  font-semibold text-lg flex items-center justify-around text-center border"
                     ref={usersRef}
                   >
                     <span
                       onClick={changeGroupType}
                       className="ml-4 cursor-pointer"
                     >
-                      <MdOutlineKeyboardBackspace />
+                      <MdOutlineKeyboardBackspace
+                        className="text-blue-500"
+                        size="1.5rem"
+                      />
                     </span>
-                    <span className="ml-6">Go Back</span>
-                    <MdDone onClick={usersSelected} />
+                    <span className="ml-2">Go Back</span>
+                    <MdDone
+                      className={`${
+                        state.checkboxCheckedList.length > 0
+                          ? "text-blue-500 cursor-pointer"
+                          : "text-gray-400"
+                      }`}
+                      size="1.5rem"
+                      onClick={usersSelected}
+                    />
                   </div>
                 </>
               )}
@@ -80,6 +95,9 @@ const mapDispatchToProps = (dispatch) => {
   return {
     setIsOneToOne: (data) => {
       dispatch({ type: "IS_ONE_TO_ONE", payload: data });
+    },
+    resetCheckboxItem: (data) => {
+      dispatch({ type: "RESET_CHECKBOX", payload: data });
     },
   };
 };

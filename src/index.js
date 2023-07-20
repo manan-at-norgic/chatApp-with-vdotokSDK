@@ -10,12 +10,14 @@ import "./index.css";
 import "react-toastify/dist/ReactToastify.min.css";
 import allusers from "./redux/reducers/allUsers";
 import userListBox from "./redux/reducers/userListBox";
+import checkboxCheckedList from "./redux/reducers/checkboxCheckedList";
 
 //combie reducers
 const rootReducer = combineReducers({
   auth: authReducer,
   allUsers: allusers,
   userListBox: userListBox,
+  checkboxCheckedList: checkboxCheckedList,
 });
 // Creating store
 const store = createStore(rootReducer, composeWithDevTools());
