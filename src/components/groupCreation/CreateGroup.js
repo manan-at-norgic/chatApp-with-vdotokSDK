@@ -3,9 +3,12 @@ import { AiOutlineUsergroupAdd } from "react-icons/ai";
 import { MdOutlineKeyboardBackspace, MdDone } from "react-icons/md";
 import ManyToMany from "./ManyToMany";
 import { connect } from "react-redux";
+import MtoMGroupName from "./MtoMGroupName";
+import { useState } from "react";
 
 //get local users from redux
 const CreateGroup = ({ usersRef, state, setIsOneToOne, resetCheckboxItem }) => {
+  const [groupNameModal, setGroupNameModal] = useState(false);
   const changeGroupType = () => {
     setIsOneToOne(!state.userListBox.isOneToOne);
     resetCheckboxItem();
@@ -13,12 +16,14 @@ const CreateGroup = ({ usersRef, state, setIsOneToOne, resetCheckboxItem }) => {
   const usersSelected = () => {
     if (state.checkboxCheckedList.length > 0) {
       console.log("ok");
+      setGroupNameModal(true);
     } else {
       console.log("not ok");
     }
   };
   return (
     <>
+      {groupNameModal ? <MtoMGroupName /> : ""}
       {state.userListBox.isUserListActive ? (
         <>
           <div
