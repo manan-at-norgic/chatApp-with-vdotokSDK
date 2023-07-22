@@ -11,6 +11,10 @@ import "react-toastify/dist/ReactToastify.min.css";
 import allusers from "./redux/reducers/allUsers";
 import userListBox from "./redux/reducers/userListBox";
 import checkboxCheckedList from "./redux/reducers/checkboxCheckedList";
+import groupNameModal from "./redux/reducers/groupNameModal";
+import groupsReducer from "./redux/reducers/groupsReducer";
+import searchUserString from "./redux/reducers/searchUserString";
+import searchGroupString from "./redux/reducers/searchGroupString";
 
 //combie reducers
 const rootReducer = combineReducers({
@@ -18,6 +22,10 @@ const rootReducer = combineReducers({
   allUsers: allusers,
   userListBox: userListBox,
   checkboxCheckedList: checkboxCheckedList,
+  groupNameModal: groupNameModal,
+  groups: groupsReducer,
+  searchUserString: searchUserString,
+  searchGroupString: searchGroupString,
 });
 // Creating store
 const store = createStore(rootReducer, composeWithDevTools());

@@ -7,8 +7,15 @@ import MtoMGroupName from "./MtoMGroupName";
 import { useState } from "react";
 
 //get local users from redux
-const CreateGroup = ({ usersRef, state, setIsOneToOne, resetCheckboxItem }) => {
-  const [groupNameModal, setGroupNameModal] = useState(false);
+const CreateGroup = ({
+  usersRef,
+  state,
+  setIsOneToOne,
+  resetCheckboxItem,
+  setGroupNameModal,
+  setIsUserListActive,
+}) => {
+  // const [groupNameModal, setGroupNameModal] = useState(false);
   const changeGroupType = () => {
     setIsOneToOne(!state.userListBox.isOneToOne);
     resetCheckboxItem();
@@ -16,6 +23,7 @@ const CreateGroup = ({ usersRef, state, setIsOneToOne, resetCheckboxItem }) => {
   const usersSelected = () => {
     if (state.checkboxCheckedList.length > 0) {
       console.log("ok");
+      // setIsUserListActive(false);
       setGroupNameModal(true);
     } else {
       console.log("not ok");
@@ -23,7 +31,7 @@ const CreateGroup = ({ usersRef, state, setIsOneToOne, resetCheckboxItem }) => {
   };
   return (
     <>
-      {groupNameModal ? <MtoMGroupName /> : ""}
+      {state.groupNameModal.isGroupNameModal ? <MtoMGroupName /> : ""}
       {state.userListBox.isUserListActive ? (
         <>
           <div
@@ -103,6 +111,12 @@ const mapDispatchToProps = (dispatch) => {
     },
     resetCheckboxItem: (data) => {
       dispatch({ type: "RESET_CHECKBOX", payload: data });
+    },
+    setIsUserListActive: (data) => {
+      dispatch({ type: "IS_USER_LIST_ACTIVE", payload: data });
+    },
+    setGroupNameModal: (data) => {
+      dispatch({ type: "IS_GROUP_NAME_MODAL_ACTIVE", payload: data });
     },
   };
 };

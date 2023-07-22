@@ -5,7 +5,9 @@ import { connect } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import env from "../config";
 import { ToastContainer, toast } from "react-toastify";
+import { AiTwotoneDelete } from "react-icons/ai";
 import CreateGroup from "./groupCreation/CreateGroup";
+import common from "./methods/common";
 
 const Home = ({
   setLoginInfo,
@@ -14,6 +16,10 @@ const Home = ({
   setAllUsers,
   setIsUserListActive,
   setIsOneToOne,
+  setGroupsList,
+  setUserSearchString,
+  resetSearchString,
+  setGroupSearchString,
 }) => {
   const inputRef = useRef(null);
   const usersRef = useRef(null);
@@ -33,6 +39,7 @@ const Home = ({
     ) {
       // Close the component or perform any desired action
       setIsUserListActive(false);
+      resetSearchString();
       setIsOneToOne(true);
       // console.log("Clicked outside the container and specific element");
     }
@@ -42,6 +49,39 @@ const Home = ({
     resetLoginInfo();
     localStorage.removeItem("user");
     navigate("/");
+  };
+
+  const deleteGroup = async (id) => {
+    let payload = {
+      group_id: `${id}`,
+      auth_token: `${state.auth.token}`,
+    };
+    let res = await axios.post(`${env.url}DeleteGroup`, payload);
+
+    console.log("group deleted ====> ", res);
+    toast.info(res.data.message);
+    let resGroups = await common.fetchGroups(state.auth.token);
+
+    if (resGroups.data.status === 200) {
+      setGroupsList(resGroups.data.groups);
+    } else {
+      toast.warn(`${resGroups.data.message}`);
+    }
+    // alert(`delete group ---> ${id}`);
+  };
+  const findString = (e) => {
+    if (state.searchGroupString !== "") {
+      let lowered = e.group_title.toLowerCase(),
+        loweredS = state.searchGroupString.toLowerCase();
+      // e.username.indexOf(search) > -1
+      if (lowered.indexOf(loweredS) > -1) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return true;
+    }
   };
 
   // if logged in fetch users list (localstorage)
@@ -63,10 +103,18 @@ const Home = ({
         } else {
           toast.warn(`${response.data.message}`);
         }
-        return response;
+
+        let resGroups = await common.fetchGroups(data.token);
+
+        if (resGroups.data.status === 200) {
+          setGroupsList(resGroups.data.groups);
+        } else {
+          toast.warn(`${resGroups.data.message}`);
+        }
       };
 
       fetchAllUsers();
+
       // navigate("/");
     }
   }, []);
@@ -74,8 +122,6 @@ const Home = ({
   useEffect(() => {
     if (state.auth.isLoggedIn === true) {
       let fetchAllUsers = async () => {
-        // console.warn(data.token);
-
         let payload = { auth_token: state.auth.token };
         let response = await axios.post(`${env.url}AllUsers`, payload);
         // console.log(response, "response from homeeeeee");
@@ -85,7 +131,13 @@ const Home = ({
         } else {
           toast.warn(`${response.data.message}`);
         }
-        return response;
+        let resGroups = await common.fetchGroups(state.auth.token);
+
+        if (resGroups.data.status === 200) {
+          setGroupsList(resGroups.data.groups);
+        } else {
+          toast.warn(`${resGroups.data.message}`);
+        }
       };
 
       fetchAllUsers();
@@ -128,10 +180,15 @@ const Home = ({
             <input
               ref={inputRef}
               onFocus={handleFocus}
+              onClick={handleFocus}
               // onBlur={handleBlur}
               type="text"
-              name=""
-              id=""
+              name="searchUser"
+              id="searchUser"
+              value={state.searchUserString}
+              onChange={(e) => {
+                setUserSearchString(e.target.value);
+              }}
               // onClick={() => {}}
               placeholder="search user"
               className="rounded-2xl search relative bg-gray-100 py-3 px-5 w-1/2"
@@ -157,96 +214,66 @@ const Home = ({
         <div className="flex flex-row justify-between bg-white">
           {/* <!-- chat list --> */}
           <div className="flex flex-col w-2/5 border-r-2 overflow-y-auto">
-            {/* <!-- search compt --> */}
+            {/* <!-- search Group component --> */}
             <div className="border-b-2 py-4 px-2">
               <input
                 type="text"
+                value={state.searchGroupString}
+                onChange={(e) => {
+                  setGroupSearchString(e.target.value);
+                }}
                 placeholder="search chatting"
                 className="py-2 px-2 border-2 border-gray-200 rounded-2xl w-full"
               />
             </div>
-            {/* <!-- end search compt -->
-        <!-- user list --> */}
-            <div className="flex flex-row py-4 px-2 justify-center items-center border-b-2">
-              <div className="w-1/4">
-                <img
-                  src="https://source.unsplash.com/_7LbC5J-jw4/600x600"
-                  className="object-cover h-12 w-12 rounded-full"
-                  alt=""
-                />
+            {/* <!-- end search component -->
+        <!-- Groups list --> */}
+            {state.groups.length > 0 ? (
+              <>
+                {state.groups.map((group, index) => {
+                  return (
+                    <div key={index}>
+                      {findString(group) === true ? (
+                        <div key={index}>
+                          <div className="flex flex-row py-4 px-2 items-center border-b-2">
+                            <div className="w-1/4">
+                              <img
+                                src="https://source.unsplash.com/_7LbC5J-jw4/600x600"
+                                className="object-cover h-12 w-12 rounded-full"
+                                alt=""
+                              />
+                            </div>
+                            <div className="w-full">
+                              <div className="text-lg font-semibold">
+                                {group.group_title}
+                              </div>
+                              <span className="text-gray-500">
+                                Pick me at 9:00 Am
+                              </span>
+                            </div>
+                            <AiTwotoneDelete
+                              onClick={() => {
+                                deleteGroup(group.id);
+                              }}
+                              className="ml-8 mt-4 cursor-pointer text-red-500"
+                              size="1.5rem"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        ""
+                      )}
+                    </div>
+                  );
+                })}
+              </>
+            ) : (
+              <div className="w-full font-semibold flex-wrap text-xl mb-40 h-full flex justify-center items-center">
+                <span>Loading Groups</span>
               </div>
-              <div className="w-full">
-                <div className="text-lg font-semibold">Luis1994</div>
-                <span className="text-gray-500">Pick me at 9:00 Am</span>
-              </div>
-            </div>
-            <div className="flex flex-row py-4 px-2 items-center border-b-2">
-              <div className="w-1/4">
-                <img
-                  src="https://source.unsplash.com/otT2199XwI8/600x600"
-                  className="object-cover h-12 w-12 rounded-full"
-                  alt=""
-                />
-              </div>
-              <div className="w-full">
-                <div className="text-lg font-semibold">Everest Trip 2021</div>
-                <span className="text-gray-500">Hi Sam, Welcome</span>
-              </div>
-            </div>
-            <div className="flex flex-row py-4 px-2 items-center border-b-2">
-              <div className="w-1/4">
-                <img
-                  src="https://source.unsplash.com/otT2199XwI8/600x600"
-                  className="object-cover h-12 w-12 rounded-full"
-                  alt=""
-                />
-              </div>
-              <div className="w-full">
-                <div className="text-lg font-semibold">Everest Trip 2021</div>
-                <span className="text-gray-500">Hi Sam, Welcome</span>
-              </div>
-            </div>
-            <div className="flex flex-row py-4 px-2 items-center border-b-2">
-              <div className="w-1/4">
-                <img
-                  src="https://source.unsplash.com/otT2199XwI8/600x600"
-                  className="object-cover h-12 w-12 rounded-full"
-                  alt=""
-                />
-              </div>
-              <div className="w-full">
-                <div className="text-lg font-semibold">Everest Trip 2021</div>
-                <span className="text-gray-500">Hi Sam, Welcome</span>
-              </div>
-            </div>
-            <div className="flex flex-row py-4 px-2 items-center border-b-2">
-              <div className="w-1/4">
-                <img
-                  src="https://source.unsplash.com/otT2199XwI8/600x600"
-                  className="object-cover h-12 w-12 rounded-full"
-                  alt=""
-                />
-              </div>
-              <div className="w-full">
-                <div className="text-lg font-semibold">Everest Trip 2021</div>
-                <span className="text-gray-500">Hi Sam, Welcome</span>
-              </div>
-            </div>
-            <div className="flex flex-row py-4 px-2 items-center border-b-2">
-              <div className="w-1/4">
-                <img
-                  src="https://source.unsplash.com/otT2199XwI8/600x600"
-                  className="object-cover h-12 w-12 rounded-full"
-                  alt=""
-                />
-              </div>
-              <div className="w-full">
-                <div className="text-lg font-semibold">Everest Trip 2021</div>
-                <span className="text-gray-500">Hi Sam, Welcome</span>
-              </div>
-            </div>
+            )}
 
-            {/* <!-- end user list --> */}
+            {/* <!-- end GROUP list --> */}
           </div>
           {/* <!-- end chat list -->
       <!-- message --> */}
@@ -403,6 +430,18 @@ const mapDispatchToProps = (dispatch) => {
     },
     setIsUserListActive: (data) => {
       dispatch({ type: "IS_USER_LIST_ACTIVE", payload: data });
+    },
+    setGroupsList: (data) => {
+      dispatch({ type: "SET_ALL_GROUPS", payload: data });
+    },
+    setUserSearchString: (data) => {
+      dispatch({ type: "SET_USER_SEARCH_STRING", payload: data });
+    },
+    setGroupSearchString: (data) => {
+      dispatch({ type: "SET_SEARCH_GROUP_STRING", payload: data });
+    },
+    resetSearchString: (data) => {
+      dispatch({ type: "RESET_SEARCH_STRING", payload: data });
     },
   };
 };
