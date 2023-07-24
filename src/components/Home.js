@@ -8,6 +8,7 @@ import { ToastContainer, toast } from "react-toastify";
 import { AiTwotoneDelete } from "react-icons/ai";
 import CreateGroup from "./groupCreation/CreateGroup";
 import common from "./methods/common";
+import CurrentChat from "./inbox/CurrentChat";
 
 const Home = ({
   setLoginInfo,
@@ -20,6 +21,11 @@ const Home = ({
   setUserSearchString,
   resetSearchString,
   setGroupSearchString,
+  setLocalMsg,
+  resetLocalMsg,
+  setChat,
+  setCurrentGroup,
+  setMessages,
 }) => {
   const inputRef = useRef(null);
   const usersRef = useRef(null);
@@ -155,7 +161,26 @@ const Home = ({
       window.removeEventListener("click", handleWindowClick);
     };
   }, []);
-
+  useEffect(() => {
+    if (Object.keys(state.localMsg.currentGroup).length > 0) {
+      let localStateChat = state.chats;
+      if (state.chats.length > 0) {
+        let isIdExist = false;
+        for (let i = 0; i < localStateChat.length; i++) {
+          if (localStateChat[i].id === state.localMsg.currentGroup.id) {
+            // console.log("same id ignored");
+            isIdExist = true;
+          }
+        }
+        if (!isIdExist) {
+          setChat({ ...state.localMsg.currentGroup, messages: [] });
+        }
+      } else {
+        setChat({ ...state.localMsg.currentGroup, messages: [] });
+      }
+    }
+  }, [state.localMsg.currentGroup]);
+  console.log(state.chats);
   return (
     <>
       {/* <!-- component -->
@@ -232,7 +257,13 @@ const Home = ({
               <>
                 {state.groups.map((group, index) => {
                   return (
-                    <div key={index}>
+                    <div
+                      key={index}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setCurrentGroup({ ...group });
+                      }}
+                    >
                       {findString(group) === true ? (
                         <div key={index}>
                           <div className="flex flex-row py-4 px-2 items-center border-b-2">
@@ -277,136 +308,50 @@ const Home = ({
           </div>
           {/* <!-- end chat list -->
       <!-- message --> */}
-          <div className="block">
+          <div className="w-3/4">
             <div
               className="w-full overflow-y-scroll px-5 flex flex-col justify-between"
               style={{ height: "calc(100vh - 12rem)" }}
             >
-              <div className="flex flex-col mt-5">
-                <div className="flex justify-end mb-4">
-                  <div className="mr-2 py-3 px-4 bg-blue-400 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl text-white">
-                    Welcome to group everyone !
-                  </div>
-                  <img
-                    src="https://source.unsplash.com/vpOeXr5wmR4/600x600"
-                    className="object-cover h-8 w-8 rounded-full"
-                    alt=""
-                  />
-                </div>
-                <div className="flex justify-start mb-4">
-                  <img
-                    src="https://source.unsplash.com/vpOeXr5wmR4/600x600"
-                    className="object-cover h-8 w-8 rounded-full"
-                    alt=""
-                  />
-                  <div className="ml-2 py-3 px-4 bg-gray-400 rounded-br-3xl rounded-tr-3xl rounded-tl-xl text-white">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Quaerat at praesentium, aut ullam delectus odio error sit
-                    rem. Architecto nulla doloribus laborum illo rem enim dolor
-                    odio saepe, consequatur quas?
-                  </div>
-                </div>
-                <div className="flex justify-end mb-4">
-                  <div>
-                    <div className="mr-2 py-3 px-4 bg-blue-400 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl text-white">
-                      Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                      Magnam, repudiandae.
-                    </div>
-
-                    <div className="mt-4 mr-2 py-3 px-4 bg-blue-400 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl text-white">
-                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                      Debitis, reiciendis!
-                    </div>
-                  </div>
-                  <img
-                    src="https://source.unsplash.com/vpOeXr5wmR4/600x600"
-                    className="object-cover h-8 w-8 rounded-full"
-                    alt=""
-                  />
-                </div>
-                <div className="flex justify-start mb-4">
-                  <img
-                    src="https://source.unsplash.com/vpOeXr5wmR4/600x600"
-                    className="object-cover h-8 w-8 rounded-full"
-                    alt=""
-                  />
-                  <div className="ml-2 py-3 px-4 bg-gray-400 rounded-br-3xl rounded-tr-3xl rounded-tl-xl text-white">
-                    happy holiday guys!
-                  </div>
-                </div>
-                <div className="flex justify-start mb-4">
-                  <img
-                    src="https://source.unsplash.com/vpOeXr5wmR4/600x600"
-                    className="object-cover h-8 w-8 rounded-full"
-                    alt=""
-                  />
-                  <div className="ml-2 py-3 px-4 bg-gray-400 rounded-br-3xl rounded-tr-3xl rounded-tl-xl text-white">
-                    lorem ipsum doler sit
-                  </div>
-                </div>
-                <div className="flex justify-start mb-4">
-                  <img
-                    src="https://source.unsplash.com/vpOeXr5wmR4/600x600"
-                    className="object-cover h-8 w-8 rounded-full"
-                    alt=""
-                  />
-                  <div className="ml-2 py-3 px-4 bg-gray-400 rounded-br-3xl rounded-tr-3xl rounded-tl-xl text-white">
-                    happy holiday guys!
-                  </div>
-                </div>
-                <div className="flex justify-start mb-4">
-                  <img
-                    src="https://source.unsplash.com/vpOeXr5wmR4/600x600"
-                    className="object-cover h-8 w-8 rounded-full"
-                    alt=""
-                  />
-                  <div className="ml-2 py-3 px-4 bg-gray-400 rounded-br-3xl rounded-tr-3xl rounded-tl-xl text-white">
-                    happy holiday guys!
-                  </div>
-                </div>
-                <div className="flex justify-start mb-4">
-                  <img
-                    src="https://source.unsplash.com/vpOeXr5wmR4/600x600"
-                    className="object-cover h-8 w-8 rounded-full"
-                    alt=""
-                  />
-                  <div className="ml-2 py-3 px-4 bg-gray-400 rounded-br-3xl rounded-tr-3xl rounded-tl-xl text-white">
-                    happy holiday guys!
-                  </div>
-                </div>
-                <div className="flex justify-start mb-4">
-                  <img
-                    src="https://source.unsplash.com/vpOeXr5wmR4/600x600"
-                    className="object-cover h-8 w-8 rounded-full"
-                    alt=""
-                  />
-                  <div className="ml-2 py-3 px-4 bg-gray-400 rounded-br-3xl rounded-tr-3xl rounded-tl-xl text-white">
-                    happy holiday guys!
-                  </div>
-                </div>
-                <div className="flex justify-start mb-4">
-                  <img
-                    src="https://source.unsplash.com/vpOeXr5wmR4/600x600"
-                    className="object-cover h-8 w-8 rounded-full"
-                    alt=""
-                  />
-                  <div className="ml-2 py-3 px-4 bg-gray-400 rounded-br-3xl rounded-tr-3xl rounded-tl-xl text-white">
-                    happy holiday guys!
-                  </div>
-                </div>
+              <div className="flex flex-col mt-5 w-full">
+                <CurrentChat />
               </div>
             </div>
-            <div className="px-5 py-4">
-              <input
-                className="bg-gray-300 py-5 px-3 rounded-xl"
-                style={{ width: "91%" }}
-                type="text"
-                placeholder="type your message here..."
-              />
-              <button className="bg-blue-500 cursor-pointer hover:bg-blue-700 text-white font-bold py-5 px-4 rounded focus:outline-none focus:shadow-outline">
-                submit
-              </button>
-            </div>
+            <form>
+              <div className="flex justify-center items-center w-full">
+                <input
+                  className="bg-gray-300 py-5 px-3 rounded-xl"
+                  style={{ width: "91%" }}
+                  type="text"
+                  value={state.localMsg.msg}
+                  onChange={(e) => {
+                    setLocalMsg(e.target.value);
+                  }}
+                  placeholder="type your message here..."
+                />
+                <button
+                  type="submit"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (/\S/.test(state.localMsg.msg)) {
+                      setMessages({
+                        currentChat: state.localMsg.currentGroup,
+                        message: {
+                          content: state.localMsg.msg,
+                          isSendByMe: true,
+                        },
+                      });
+                      resetLocalMsg();
+                    } else {
+                      toast.warn("Message is Blank");
+                    }
+                  }}
+                  className="bg-blue-500 cursor-pointer hover:bg-blue-700 text-white font-bold py-5 px-4 rounded focus:outline-none focus:shadow-outline"
+                >
+                  submit
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
@@ -442,6 +387,21 @@ const mapDispatchToProps = (dispatch) => {
     },
     resetSearchString: (data) => {
       dispatch({ type: "RESET_SEARCH_STRING", payload: data });
+    },
+    setLocalMsg: (data) => {
+      dispatch({ type: "SET_LOCAL_MSG", payload: data });
+    },
+    resetLocalMsg: (data) => {
+      dispatch({ type: "RESET_LOCAL_MSG", payload: data });
+    },
+    setChat: (data) => {
+      dispatch({ type: "SET_CHAT", payload: data });
+    },
+    setCurrentGroup: (data) => {
+      dispatch({ type: "SET_CURRENT_GROUP", payload: data });
+    },
+    setMessages: (data) => {
+      dispatch({ type: "SET_MSGS", payload: data });
     },
   };
 };

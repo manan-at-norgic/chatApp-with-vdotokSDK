@@ -15,7 +15,8 @@ import groupNameModal from "./redux/reducers/groupNameModal";
 import groupsReducer from "./redux/reducers/groupsReducer";
 import searchUserString from "./redux/reducers/searchUserString";
 import searchGroupString from "./redux/reducers/searchGroupString";
-
+import localMsg from "./redux/reducers/localMsg";
+import chats from "./redux/reducers/chats";
 //combie reducers
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -26,6 +27,8 @@ const rootReducer = combineReducers({
   groups: groupsReducer,
   searchUserString: searchUserString,
   searchGroupString: searchGroupString,
+  localMsg: localMsg,
+  chats: chats,
 });
 // Creating store
 const store = createStore(rootReducer, composeWithDevTools());

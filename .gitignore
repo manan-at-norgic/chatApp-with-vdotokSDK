@@ -1,6 +1,5 @@
 node_modules
 package-lock.json
 dist
-./src/config.js
-src\config.js
+*config.js
 completed functionalities in Chat MODEL APP with reactJS.txt
