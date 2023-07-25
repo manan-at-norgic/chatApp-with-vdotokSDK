@@ -26,6 +26,8 @@ const Home = ({
   setChat,
   setCurrentGroup,
   setMessages,
+  setSingleChat,
+  resetSingleChat,
 }) => {
   const inputRef = useRef(null);
   const usersRef = useRef(null);
@@ -70,6 +72,7 @@ const Home = ({
 
     if (resGroups.data.status === 200) {
       setGroupsList(resGroups.data.groups);
+      resetSingleChat({});
     } else {
       toast.warn(`${resGroups.data.message}`);
     }
@@ -98,7 +101,7 @@ const Home = ({
       let data = JSON.parse(isLogin);
       setLoginInfo(data);
       let fetchAllUsers = async () => {
-        console.warn(data.token);
+        // console.warn(data.token);
 
         let payload = { auth_token: data.token };
         let response = await axios.post(`${env.url}AllUsers`, payload);
@@ -180,7 +183,17 @@ const Home = ({
       }
     }
   }, [state.localMsg.currentGroup]);
-  console.log(state.chats);
+  // console.log(state.chats);
+
+  useEffect(() => {
+    let filtered = state.chats.filter(
+      (chat) => chat.id === state.localMsg.currentGroup.id
+    );
+    if (filtered !== undefined) {
+      setSingleChat(filtered[0]);
+    }
+    console.log(state.singleChat);
+  }, [state.chats, state.localMsg]);
   return (
     <>
       {/* <!-- component -->
@@ -402,6 +415,12 @@ const mapDispatchToProps = (dispatch) => {
     },
     setMessages: (data) => {
       dispatch({ type: "SET_MSGS", payload: data });
+    },
+    setSingleChat: (data) => {
+      dispatch({ type: "SET_SINGLE_CHAT", payload: data });
+    },
+    resetSingleChat: (data) => {
+      dispatch({ type: "RESET_SINGLE_CHAT", payload: data });
     },
   };
 };

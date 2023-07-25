@@ -7,3 +7,20 @@
   padding: 0;
   box-sizing: border-box;
 }
+
+.scroll-custom::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.scroll-custom::-webkit-scrollbar-thumb {
+  background-image: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    color-stop(0.44, rgb(96 165 250)),
+    color-stop(0.72, rgb(147 197 253)),
+    color-stop(0.86, rgb(96 165 250))
+  );
+  border-radius: 10px;
+}

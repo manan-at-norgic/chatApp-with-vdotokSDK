@@ -6,7 +6,7 @@ const chats = (state = initialState, action) => {
     case "SET_CHAT":
       return (state = [...state, action.payload]);
     case "SET_MSGS":
-      console.log(action.payload, "0000");
+      //   console.log(action.payload, "0000");
 
       if (state.length > 1) {
         let obJ = { exist: false, id: "" };
@@ -36,31 +36,6 @@ const chats = (state = initialState, action) => {
           },
         ]);
       }
-    //   for (let i = 0; i < state.length; i++) {
-    //     if (state[i].id === action.payload.currentChat.id) {
-    //       console.log("SET_MSGS", action.payload);
-
-    //       if (state[i].message !== undefined) {
-    //         console.log(state[i], "from if");
-    //         return (state[i] = {
-    //           ...state[i],
-    //           messages: [...state[i].messages, action.payload.message],
-    //         });
-    //       } else {
-    //         return (state[i] = {
-    //           ...state[i],
-    //           messages: [action.payload.message],
-    //         });
-    //       }
-    //     } else {
-    //       console.log(
-    //         "elsee",
-    //         action.payload.currentChat.id,
-    //         "----------",
-    //         state[i].id
-    //       );
-    //     }
-    //   }
     default:
       return state;
   }

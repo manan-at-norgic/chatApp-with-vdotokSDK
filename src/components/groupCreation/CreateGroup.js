@@ -39,7 +39,7 @@ const CreateGroup = ({
             onClick={(event) => {
               event.stopPropagation();
             }}
-            className="absolute flex flex-col rounded-2xl bg-slate-50 border w-1/4"
+            className="absolute flex flex-col rounded-2xl z-[1] bg-slate-50 border w-1/4"
           >
             <div>
               {state.userListBox.isOneToOne ? (
