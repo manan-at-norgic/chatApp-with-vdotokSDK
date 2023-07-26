@@ -6,24 +6,24 @@ const chats = (state = initialState, action) => {
     case "SET_CHAT":
       return (state = [...state, action.payload]);
     case "SET_MSGS":
-      //   console.log(action.payload, "0000");
+      console.warn(action.payload, "0000");
 
       if (state.length > 1) {
-        let obJ = { exist: false, id: "" };
+        let obJ = { exist: false, channel_name: "" };
         for (let i = 0; i < state.length; i++) {
-          if (state[i].id === action.payload.currentChat.id) {
-            // console.log("same id ignored");
+          if (state[i].channel_name === action.payload.to) {
+            console.warn(
+              "same id ignored",
+              ` ${state[i].channel_name}===${action.payload.to}`
+            );
             obJ.exist = true;
-            obJ.id = state[i].id;
+            obJ.channel_name = state[i].channel_name;
           }
         }
         if (obJ) {
           state.forEach((elem) => {
-            if (elem.id === Number(obJ.id)) {
-              return (elem.messages = [
-                ...elem.messages,
-                action.payload.message,
-              ]);
+            if (elem.channel_name === obJ.channel_name) {
+              return (elem.messages = [...elem.messages, action.payload]);
             }
           });
         }
@@ -32,7 +32,7 @@ const chats = (state = initialState, action) => {
         return (state = [
           {
             ...state[0],
-            messages: [...state[0].messages, action.payload.message],
+            messages: [...state[0].messages, action.payload],
           },
         ]);
       }

@@ -28,10 +28,14 @@ const Home = ({
   setMessages,
   setSingleChat,
   resetSingleChat,
+  setMsgResponse,
+  // setClient,
+  // resetClient,
 }) => {
   const inputRef = useRef(null);
   const usersRef = useRef(null);
   const [localUsers, setLocalUsers] = useState(null);
+  const [myClient, setClient] = useState(null);
   const navigate = useNavigate();
 
   const handleFocus = () => {
@@ -93,6 +97,64 @@ const Home = ({
     }
   };
 
+  const initializeSDK = (elem) => {
+    let Client = new MVDOTOK.Client({
+      projectID: `${env.project_id}`,
+      secret: `${env.api_key}`,
+      host: `${elem.messaging_server_map.complete_address}`,
+    });
+    console.log(Client, "<----------------------------");
+    setClient(Client);
+    // console.log("client after initializing==>", Client);
+    Client.Register(elem.ref_id, elem.authorization_token);
+    Client.on("connect", (res) => {
+      // you can do something after connecting the socket
+      // console.log("**res on connect sdk", res);
+      // client.Subscribe({});
+    });
+    Client.on("subscribed", (response) => {
+      console.log(
+        "**********************res on Subscribe-------------------------",
+        response
+      );
+    });
+    Client.on("message", (res) => {
+      console.log(res, "----------------res heres mesaage");
+
+      console.log(state.singleChat);
+      setMessages({ ...res });
+      resetLocalMsg();
+    });
+  };
+
+  const handleSubmitMsg = (e) => {
+    e.preventDefault();
+
+    let idd = new Date().getTime().toString();
+    let payload = {
+      status: 1,
+      size: 0,
+      type: "text",
+      from: state.auth.user.ref_id,
+      content: state.localMsg.msg,
+      id: idd,
+      date: new Date().getTime(),
+      key: state.localMsg.currentGroup.channel_key,
+      to: state.localMsg.currentGroup.channel_name,
+    };
+
+    if (/\S/.test(state.localMsg.msg)) {
+      // setMessages({
+      //   currentChat: state.localMsg.currentGroup,
+      //   message: payload,
+      // });
+      myClient.SendMessage(payload);
+      resetLocalMsg();
+    } else {
+      toast.warn("Message is Blank");
+    }
+  };
+
   // if logged in fetch users list (localstorage)
   useEffect(() => {
     let isLogin = localStorage.getItem("user");
@@ -131,6 +193,8 @@ const Home = ({
   useEffect(() => {
     if (state.auth.isLoggedIn === true) {
       let fetchAllUsers = async () => {
+        initializeSDK(state.auth.user);
+
         let payload = { auth_token: state.auth.token };
         let response = await axios.post(`${env.url}AllUsers`, payload);
         // console.log(response, "response from homeeeeee");
@@ -150,6 +214,12 @@ const Home = ({
       };
 
       fetchAllUsers();
+    } else {
+      let loc = localStorage.getItem("user");
+      if (loc) {
+        let data = JSON.parse(loc);
+        initializeSDK(data.user);
+      }
     }
   }, []);
   // event listner for active state and inavtive state of input field
@@ -169,10 +239,15 @@ const Home = ({
       let localStateChat = state.chats;
       if (state.chats.length > 0) {
         let isIdExist = false;
+        let idx = null;
         for (let i = 0; i < localStateChat.length; i++) {
-          if (localStateChat[i].id === state.localMsg.currentGroup.id) {
+          if (
+            localStateChat[i].channel_name ===
+            state.localMsg.currentGroup.channel_name
+          ) {
             // console.log("same id ignored");
             isIdExist = true;
+            idx = i;
           }
         }
         if (!isIdExist) {
@@ -187,13 +262,36 @@ const Home = ({
 
   useEffect(() => {
     let filtered = state.chats.filter(
-      (chat) => chat.id === state.localMsg.currentGroup.id
+      (chat) => chat.channel_name === state.localMsg.currentGroup.channel_name
     );
     if (filtered !== undefined) {
       setSingleChat(filtered[0]);
     }
-    console.log(state.singleChat);
   }, [state.chats, state.localMsg]);
+
+  // subscribe all groups
+  // subscribe all channels
+  useEffect(() => {
+    if (
+      state.groups !== undefined &&
+      state.groups.length !== 0 &&
+      myClient !== null
+    ) {
+      console.log("hi-------");
+      let grpsToSubscribe = [];
+      state.groups.map((e) => {
+        grpsToSubscribe.push({ key: e.channel_key, channel: e.channel_name });
+      });
+
+      grpsToSubscribe.map((e) => {
+        console.log(e);
+        myClient.Subscribe(e);
+      });
+      // myClient.on("subscribed", (res) => {
+      //   console.log("res on Subscribe-------------------------", res);
+      // });
+    }
+  }, [state.groups]);
   return (
     <>
       {/* <!-- component -->
@@ -251,7 +349,7 @@ const Home = ({
     <!-- Chatting --> */}
         <div className="flex flex-row justify-between bg-white">
           {/* <!-- chat list --> */}
-          <div className="flex flex-col w-2/5 border-r-2 overflow-y-auto">
+          <div className="flex flex-col w-2/5 border-r-2">
             {/* <!-- search Group component --> */}
             <div className="border-b-2 py-4 px-2">
               <input
@@ -265,9 +363,9 @@ const Home = ({
               />
             </div>
             {/* <!-- end search component -->
-        <!-- Groups list --> */}
+            <!-- Groups list --> */}
             {state.groups.length > 0 ? (
-              <>
+              <div className="overflow-y-scroll scroll-custom h-[77vh] ">
                 {state.groups.map((group, index) => {
                   return (
                     <div
@@ -310,7 +408,7 @@ const Home = ({
                     </div>
                   );
                 })}
-              </>
+              </div>
             ) : (
               <div className="w-full font-semibold flex-wrap text-xl mb-40 h-full flex justify-center items-center">
                 <span>Loading Groups</span>
@@ -320,52 +418,46 @@ const Home = ({
             {/* <!-- end GROUP list --> */}
           </div>
           {/* <!-- end chat list -->
-      <!-- message --> */}
-          <div className="w-3/4">
-            <div
-              className="w-full overflow-y-scroll px-5 flex flex-col justify-between"
-              style={{ height: "calc(100vh - 12rem)" }}
-            >
-              <div className="flex flex-col mt-5 w-full">
-                <CurrentChat />
+          <!-- message --> */}
+          {Object.keys(state.singleChat).length !== 0 ? (
+            <div className="w-full relative">
+              <div
+                className="w-full overflow-y-scroll mt-9 px-5 flex flex-col justify-between scroll-custom"
+                style={{ height: "calc(100vh - 12rem)" }}
+              >
+                <div className="flex flex-col mt-5 w-full">
+                  <CurrentChat />
+                </div>
+              </div>
+              <form>
+                <div className="flex justify-center items-center w-full">
+                  <input
+                    className="bg-gray-300 py-5 px-3 rounded-xl"
+                    style={{ width: "91%" }}
+                    type="text"
+                    value={state.localMsg.msg}
+                    onChange={(e) => {
+                      setLocalMsg(e.target.value);
+                    }}
+                    placeholder="type your message here..."
+                  />
+                  <button
+                    type="submit"
+                    onClick={handleSubmitMsg}
+                    className="bg-blue-500 cursor-pointer hover:bg-blue-700 text-white font-bold py-5 px-4 rounded focus:outline-none focus:shadow-outline"
+                  >
+                    submit
+                  </button>
+                </div>
+              </form>
+            </div>
+          ) : (
+            <div className="w-full">
+              <div className="flex justify-center items-center h-full font-semibold text-2xl">
+                Start Chat
               </div>
             </div>
-            <form>
-              <div className="flex justify-center items-center w-full">
-                <input
-                  className="bg-gray-300 py-5 px-3 rounded-xl"
-                  style={{ width: "91%" }}
-                  type="text"
-                  value={state.localMsg.msg}
-                  onChange={(e) => {
-                    setLocalMsg(e.target.value);
-                  }}
-                  placeholder="type your message here..."
-                />
-                <button
-                  type="submit"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (/\S/.test(state.localMsg.msg)) {
-                      setMessages({
-                        currentChat: state.localMsg.currentGroup,
-                        message: {
-                          content: state.localMsg.msg,
-                          isSendByMe: true,
-                        },
-                      });
-                      resetLocalMsg();
-                    } else {
-                      toast.warn("Message is Blank");
-                    }
-                  }}
-                  className="bg-blue-500 cursor-pointer hover:bg-blue-700 text-white font-bold py-5 px-4 rounded focus:outline-none focus:shadow-outline"
-                >
-                  submit
-                </button>
-              </div>
-            </form>
-          </div>
+          )}
         </div>
       </div>
     </>
@@ -421,6 +513,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     resetSingleChat: (data) => {
       dispatch({ type: "RESET_SINGLE_CHAT", payload: data });
+    },
+    setMsgResponse: (data) => {
+      dispatch({ type: "SET_MSG_RESPONSE", payload: data });
     },
   };
 };

@@ -18,6 +18,7 @@ import searchGroupString from "./redux/reducers/searchGroupString";
 import localMsg from "./redux/reducers/localMsg";
 import chats from "./redux/reducers/chats";
 import singleChat from "./redux/reducers/singleChat";
+import msgResponse from "./redux/reducers/msgResponse";
 //combie reducers
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -31,6 +32,7 @@ const rootReducer = combineReducers({
   localMsg: localMsg,
   chats: chats,
   singleChat: singleChat,
+  msgRespone: msgResponse,
 });
 // Creating store
 const store = createStore(rootReducer, composeWithDevTools());
