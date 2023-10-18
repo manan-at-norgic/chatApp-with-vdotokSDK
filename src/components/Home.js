@@ -100,7 +100,7 @@ const Home = ({
   const initializeSDK = (elem) => {
     let Client = new MVDOTOK.Client({
       projectID: `${env.project_id}`,
-      secret: `${env.api_key}`,
+      // secret: `${env.api_key}`,
       host: `${elem.messaging_server_map.complete_address}`,
     });
     console.log(Client, "<----------------------------");
